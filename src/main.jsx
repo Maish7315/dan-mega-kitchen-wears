@@ -457,7 +457,7 @@ function Header() {
           <Menu />
         </button>
         <Link to="/" className="flex min-w-max items-center gap-2">
-          <span className="grid h-11 w-11 place-items-center rounded-md bg-emeraldDeep text-lg font-black text-gold shadow-gold">DM</span>
+          <LazyImage src="/assets/loggo.jpeg" alt="Dan Mega Kitchen Wares" className="h-11 w-11 rounded-md object-cover" />
           <span>
             <span className="block text-sm font-black leading-4 sm:text-base">Dan Mega</span>
             <span className="block text-xs font-semibold text-emerald-700 dark:text-gold">Kitchen Wares</span>
