@@ -30,3 +30,22 @@ body {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.product-image {
+  touch-action: manipulation;
+}
+
+.product-image.pinch-zoom {
+  touch-action: pinch-zoom;
+  user-select: none;
+  -webkit-user-drag: none;
+}

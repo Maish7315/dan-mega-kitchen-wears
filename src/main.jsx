@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState, useRef, useCallback } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Link, Route, Routes, useNavigate, useParams } from 'react-router-dom';
+import { BrowserRouter, Link, Route, Routes, useNavigate, useParams, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   BadgeCheck,
@@ -370,6 +370,7 @@ function App() {
     <BrowserRouter>
       <StoreProvider>
         <div className="min-h-screen bg-stone-50 text-gray-950 antialiased dark:bg-gray-950 dark:text-white">
+          <ScrollToTop />
           <AnnouncementBar />
           <Header />
           <CartDrawer />
@@ -378,6 +379,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/product/:slug" element={<ProductDetails />} />
               <Route path="/cart" element={<CartPage />} />
+              <Route path="/wishlist" element={<WishlistPage />} />
               <Route path="/wholesale" element={<WholesalePage />} />
               <Route path="/account" element={<AccountPage />} />
               <Route path="*" element={<Home />} />
@@ -389,6 +391,14 @@ function App() {
       </StoreProvider>
     </BrowserRouter>
   );
+}
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
 }
 
 function AnnouncementBar() {
@@ -487,10 +497,10 @@ function Header() {
           )}
         </div>
         <div className="ml-auto flex items-center gap-1">
-          <button className="relative rounded-full p-2 hover:bg-emerald-50 dark:hover:bg-white/10" aria-label="Wishlist">
+          <Link to="/wishlist" className="relative rounded-full p-2 hover:bg-emerald-50 dark:hover:bg-white/10" aria-label="Wishlist">
             <Heart className="h-5 w-5" />
             {wishlist.length > 0 && <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-gold px-1 text-xs font-black text-emeraldDeep">{wishlist.length}</span>}
-          </button>
+          </Link>
           <button className="relative rounded-full p-2 hover:bg-emerald-50 dark:hover:bg-white/10" onClick={() => setCartOpen(true)} aria-label="Open cart">
             <ShoppingCart className="h-5 w-5" />
             {cartItems.length > 0 && <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-gold px-1 text-xs font-black text-emeraldDeep">{cartItems.reduce((sum, item) => sum + item.qty, 0)}</span>}
@@ -521,12 +531,169 @@ function Header() {
   );
 }
 
-function ImageWithFallback({ src, alt, className }) {
-  const [hasError, setHasError] = useState(false);
-  if (hasError) {
-    return <div className={`${className} bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs text-gray-500`}>Image unavailable</div>;
+function ProductImageGallery({ images, alt }) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [zoomPos, setZoomPos] = useState({ x: 0, y: 0, bgX: 0, bgY: 0 });
+  const [showZoom, setShowZoom] = useState(false);
+  const containerRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    setIsMobile(typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches);
+  }, []);
+
+  const handleMouseMove = useCallback((e) => {
+    if (isMobile) return;
+    const container = containerRef.current;
+    if (!container) return;
+    const rect = container.getBoundingClientRect();
+    const zoomLevel = 2.5;
+    setZoomPos({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+      bgX: (e.clientX - rect.left) / rect.width * 100,
+      bgY: (e.clientY - rect.top) / rect.height * 100,
+      zoomLevel,
+    });
+  }, [isMobile]);
+
+  useEffect(() => {
+    if (isMobile) {
+      let startX = 0;
+
+      const handleTouchStartSwipe = (e) => {
+        if (e.touches.length === 1) {
+          startX = e.touches[0].clientX;
+        }
+      };
+
+      const handleTouchEndSwipe = (e) => {
+        if (!startX) return;
+        const endX = e.changedTouches[0].clientX;
+        const diff = startX - endX;
+        if (Math.abs(diff) > 50) {
+          if (diff > 0 && activeIndex < images.length - 1) {
+            setActiveIndex(activeIndex + 1);
+          } else if (diff < 0 && activeIndex > 0) {
+            setActiveIndex(activeIndex - 1);
+          }
+        }
+        startX = 0;
+      };
+
+      const container = containerRef.current;
+      if (container) {
+        container.addEventListener('touchstart', handleTouchStartSwipe);
+        container.addEventListener('touchend', handleTouchEndSwipe);
+      }
+      return () => {
+        if (container) {
+          container.removeEventListener('touchstart', handleTouchStartSwipe);
+          container.removeEventListener('touchend', handleTouchEndSwipe);
+        }
+      };
+    }
+  }, [activeIndex, images, isMobile]);
+
+  return (
+    <div className="space-y-4">
+      <div 
+        ref={containerRef}
+        className="image-zoom-container relative h-[420px] w-full overflow-hidden rounded-lg border border-gray-100 bg-white dark:border-white/10 dark:bg-gray-900"
+        onMouseMove={!isMobile ? handleMouseMove : undefined}
+        onMouseEnter={() => !isMobile && setShowZoom(true)}
+        onMouseLeave={() => !isMobile && setShowZoom(false)}
+        style={{ touchAction: isMobile ? 'pinch-zoom' : 'none' }}
+      >
+        <AnimatePresence mode="wait">
+          <motion.img
+            key={activeIndex}
+            src={images[activeIndex]}
+            alt={alt}
+            className="h-full w-full object-cover"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          />
+        </AnimatePresence>
+        {showZoom && !isMobile && (
+          <div 
+            className="pointer-events-none absolute rounded-full border-2 border-white shadow-lg bg-no-repeat"
+            style={{
+              left: zoomPos.x - 60,
+              top: zoomPos.y - 60,
+              width: '120px',
+              height: '120px',
+              zIndex: 10,
+              backgroundImage: `url(${images[activeIndex]})`,
+              backgroundPosition: `${zoomPos.bgX}% ${zoomPos.bgY}%`,
+              backgroundSize: `250%`,
+            }}
+          />
+        )}
+      </div>
+      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+        {images.map((image, index) => (
+          <button
+            key={image}
+            onClick={() => setActiveIndex(index)}
+            className={`gallery-thumbnail flex-shrink-0 overflow-hidden rounded-md border-2 transition ${
+              activeIndex === index ? 'border-emeraldDeep shadow-md' : 'border-gray-100 dark:border-white/10'
+            }`}
+            aria-label={`View image ${index + 1}`}
+          >
+            <LazyImage 
+              src={image} 
+              alt={`${alt} thumbnail ${index + 1}`} 
+              className="h-20 w-20 object-cover"
+            />
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function LazyImage({ src, alt, className }) {
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
+  const [inView, setInView] = useState(false);
+  const imgRef = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    if (imgRef.current) observer.observe(imgRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  if (error) {
+    return (
+      <div ref={imgRef} className={`${className} bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs text-gray-500`}>
+        Image unavailable
+      </div>
+    );
   }
-  return <img src={src} alt={alt} className={className} onError={() => setHasError(true)} />;
+
+  return (
+    <img
+      ref={imgRef}
+      src={inView ? src : undefined}
+      alt={alt}
+      className={`${className} ${loaded ? '' : 'blur-sm scale-105'} transition-all duration-300`}
+      onLoad={() => setLoaded(true)}
+      onError={() => setError(true)}
+      loading="lazy"
+    />
+  );
 }
 
 function Home() {
@@ -559,7 +726,7 @@ function Hero() {
     <section className="relative min-h-[78vh] overflow-hidden">
       <AnimatePresence mode="wait">
         <motion.div key={slide.title} className="absolute inset-0" initial={{ opacity: 0, scale: 1.04 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.8 }}>
-          <ImageWithFallback src={slide.image} alt="" className="h-full w-full object-cover" />
+          <LazyImage src={slide.image} alt="" className="h-full w-full object-cover" />
         </motion.div>
       </AnimatePresence>
       <div className="absolute inset-0 bg-gradient-to-r from-emerald-950/95 via-emerald-950/72 to-black/20" />
@@ -614,7 +781,7 @@ function FeaturedCategories() {
         {categories.slice(0, 12).map((category, index) => (
           <motion.a id={category.id} href="#catalog" key={category.name} className="group overflow-hidden rounded-lg border border-gray-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-glow dark:border-white/10 dark:bg-gray-900" initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.03 }}>
             <div className="relative h-44 overflow-hidden">
-              <ImageWithFallback src={category.image} alt={category.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+              <LazyImage src={category.image} alt={category.name} className="h-full w-full object-cover" />
               <span className="absolute left-3 top-3 rounded-full bg-white/92 px-3 py-1 text-xs font-black text-emeraldDeep">{category.count} items</span>
             </div>
             <div className="p-4">
@@ -710,7 +877,7 @@ function ProductCard({ product }) {
   return (
     <motion.article className="group overflow-hidden rounded-lg border border-gray-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-glow dark:border-white/10 dark:bg-gray-950" initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
       <div className="relative h-56 overflow-hidden bg-gray-100">
-        <Link to={`/product/${product.slug}`}><ImageWithFallback src={product.image} alt={product.title} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" /></Link>
+        <Link to={`/product/${product.slug}`}><LazyImage src={product.image} alt={product.title} className="h-full w-full object-cover" /></Link>
         <div className="absolute left-3 top-3 flex flex-col gap-2">
           <span className="rounded-full bg-emeraldDeep px-3 py-1 text-xs font-black text-white">{product.badge}</span>
           {product.discount > 0 && <span className="rounded-full bg-orange-500 px-3 py-1 text-xs font-black text-white">-{product.discount}%</span>}
@@ -749,46 +916,14 @@ function ProductDetails() {
   const { addToCart, toggleWishlist, wishlist } = useStore();
   const [qty, setQty] = useState(1);
   
-  // Use product's actual images and variants
   const gallery = product.images && product.images.length > 0 
     ? product.images 
     : [product.image, categoryImages[product.category], productImages[(Number(product.id) + 3) % productImages.length]];
-  
-  const [active, setActive] = useState(gallery[0]);
-  const [showAllVariants, setShowAllVariants] = useState(false);
-  
+
   return (
     <PageShell>
       <div className="grid gap-8 lg:grid-cols-2">
-        <div>
-          <div className="relative overflow-hidden rounded-lg border border-gray-100 bg-white dark:border-white/10 dark:bg-gray-900">
-            <ImageWithFallback src={active} alt={product.title} className="h-[420px] w-full cursor-zoom-in object-cover transition duration-500 hover:scale-110" />
-            {product.variants && product.variants.length > 0 && (
-              <div className="absolute bottom-3 left-3 rounded-full bg-emeraldDeep px-3 py-1 text-xs font-bold text-white">
-                +{product.variants.length} variants
-              </div>
-            )}
-          </div>
-          <div className="mt-3 grid grid-cols-3 gap-3">
-            {gallery.slice(0, 3).map((image) => (
-              <button 
-                key={image} 
-                onClick={() => setActive(image)} 
-                className={`overflow-hidden rounded-md border-2 transition ${active === image ? 'border-emeraldDeep' : 'border-gray-100 dark:border-white/10'}`}
-              >
-                <ImageWithFallback src={image} alt="" className="h-24 w-full object-cover" />
-              </button>
-            ))}
-          </div>
-          {gallery.length > 3 && (
-            <button 
-              onClick={() => setShowAllVariants(true)}
-              className="mt-3 w-full rounded-md border border-gray-100 bg-gray-50 py-2 text-sm font-bold text-emeraldDeep dark:border-white/10 dark:bg-gray-800 dark:text-gold"
-            >
-              View all {gallery.length} images
-            </button>
-          )}
-        </div>
+        <ProductImageGallery images={gallery} alt={product.title} />
         <div>
           <p className="text-sm font-black uppercase tracking-wide text-emerald-700 dark:text-gold">{product.brand} / {product.category}</p>
           <h1 className="mt-2 text-3xl font-black sm:text-5xl">{product.title}</h1>
@@ -813,35 +948,6 @@ function ProductDetails() {
           </div>
         </div>
       </div>
-      {showAllVariants && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white dark:bg-gray-900">
-            <button 
-              onClick={() => setShowAllVariants(false)}
-              className="sticky top-3 right-3 float-right rounded-full bg-emeraldDeep p-2 text-white"
-            >
-              <X className="h-5 w-5" />
-            </button>
-            <div className="p-6">
-              <h2 className="mb-4 text-xl font-black">All image variations ({gallery.length})</h2>
-              <div className="grid grid-cols-2 gap-3">
-                {gallery.map((image, idx) => (
-                  <button 
-                    key={image}
-                    onClick={() => {
-                      setActive(image);
-                      setShowAllVariants(false);
-                    }}
-                    className="overflow-hidden rounded-lg border-2 border-gray-100 transition hover:border-emeraldDeep dark:border-white/10"
-                  >
-                    <ImageWithFallback src={image} alt={`Variant ${idx + 1}`} className="h-48 w-full object-cover" />
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
       <div className="mt-12 grid gap-8 lg:grid-cols-[1fr_360px]">
         <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-900">
           <h2 className="text-2xl font-black">Customer reviews</h2>
@@ -849,7 +955,7 @@ function ProductDetails() {
         </div>
         <div className="rounded-lg bg-emeraldDeep p-6 text-white shadow-glow">
           <h3 className="text-xl font-black">Frequently bought together</h3>
-          <div className="mt-4 space-y-3">{related.slice(0, 3).map((item) => <div key={item.id} className="flex gap-3 rounded-md bg-white/10 p-2"><ImageWithFallback src={item.image} alt="" className="h-14 w-14 rounded object-cover" /><span className="text-sm font-bold">{item.title}<br /><span className="text-gold">{money(item.price)}</span></span></div>)}</div>
+          <div className="mt-4 space-y-3">{related.slice(0, 3).map((item) => <div key={item.id} className="flex gap-3 rounded-md bg-white/10 p-2"><LazyImage src={item.image} alt="" className="h-14 w-14 rounded object-cover" /><span className="text-sm font-bold">{item.title}<br /><span className="text-gold">{money(item.price)}</span></span></div>)}</div>
         </div>
       </div>
       <SectionHeading eyebrow="Related products" title="Customers also viewed" />
@@ -903,7 +1009,7 @@ function PromoSections() {
         <div className="grid gap-4 lg:grid-cols-3">
           {['Modern home kitchen setup inspiration', 'Restaurant and hotel supply success stories', 'Wedding and family package deals'].map((title, index) => (
             <div key={title} className="relative min-h-72 overflow-hidden rounded-lg">
-              <ImageWithFallback src={productImages[(index + 5) % productImages.length]} alt="" className="absolute inset-0 h-full w-full object-cover" />
+              <LazyImage src={productImages[(index + 5) % productImages.length]} alt="" className="absolute inset-0 h-full w-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
               <div className="absolute bottom-0 p-5 text-white"><h3 className="text-2xl font-black">{title}</h3><p className="mt-2 text-sm text-white/80">Curated by Dan Mega Kitchen Wares for Kenya homes and institutions.</p></div>
             </div>
@@ -927,7 +1033,7 @@ function Shelf({ title, subtitle, products: shelfProducts }) {
 function ProductMini({ product, light }) {
   return (
     <Link to={`/product/${product.slug}`} className={`flex gap-3 rounded-md p-3 ${light ? 'bg-stone-50 dark:bg-gray-950' : 'bg-white/10'}`}>
-      <ImageWithFallback src={product.image} alt="" className="h-20 w-20 rounded object-cover" />
+      <LazyImage src={product.image} alt="" className="h-20 w-20 rounded object-cover" />
       <span className="min-w-0">
         <strong className="line-clamp-2 text-sm">{product.title}</strong>
         <span className={`mt-1 block text-sm font-black ${light ? 'text-emeraldDeep dark:text-gold' : 'text-gold'}`}>{money(product.price)}</span>
@@ -964,7 +1070,7 @@ function ReviewCard({ review }) {
   return (
     <article className="rounded-lg border border-gray-100 bg-stone-50 p-5 dark:border-white/10 dark:bg-gray-950">
       <div className="flex items-center gap-3">
-        <ImageWithFallback src={review.image} alt={review.name} className="h-12 w-12 rounded-full object-cover" />
+        <LazyImage src={review.image} alt={review.name} className="h-12 w-12 rounded-full object-cover" />
         <div><strong>{review.name}</strong><p className="text-sm text-gray-500">{review.location} · Verified buyer</p></div>
       </div>
       <div className="mt-3"><Stars rating={review.rating} /></div>
@@ -1095,7 +1201,7 @@ function CartPage() {
 function CartLine({ item, updateQty, removeFromCart }) {
   return (
     <div className="flex gap-3 rounded-lg border border-gray-100 bg-white p-3 dark:border-white/10 dark:bg-gray-900">
-      <ImageWithFallback src={item.image} alt="" className="h-20 w-20 rounded-md object-cover" />
+      <LazyImage src={item.image} alt="" className="h-20 w-20 rounded-md object-cover" />
       <div className="min-w-0 flex-1">
         <strong className="line-clamp-2">{item.title}</strong>
         <p className="text-sm text-gray-500">{money(item.price)}</p>
@@ -1171,6 +1277,45 @@ Delivery Notes: ${details.notes}`;
       </div>
       <button className="mt-3 w-full rounded-md bg-emeraldDeep px-6 py-3 font-black text-white shadow-glow" onClick={placeOrder}>Place Order via WhatsApp</button>
     </div>
+  );
+}
+
+function WishlistPage() {
+  const { wishlist, toggleWishlist, addToCart } = useStore();
+  const wishlistItems = products.filter((p) => wishlist.includes(p.id));
+  if (wishlistItems.length === 0) {
+    return (
+      <PageShell>
+        <h1 className="text-4xl font-black">Wishlist</h1>
+        <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">Your wishlist is empty. Save items by clicking the heart icon on products.</p>
+      </PageShell>
+    );
+  }
+  return (
+    <PageShell>
+      <h1 className="text-4xl font-black">Wishlist</h1>
+      <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{wishlistItems.length} saved items</p>
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {wishlistItems.map((product) => (
+          <motion.article key={product.id} className="overflow-hidden rounded-lg border border-gray-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-glow dark:border-white/10 dark:bg-gray-900" initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+            <div className="relative h-48 overflow-hidden bg-gray-100">
+              <Link to={`/product/${product.slug}`}><LazyImage src={product.image} alt={product.title} className="h-full w-full object-cover" /></Link>
+              <button className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-white/95 shadow-sm" onClick={() => toggleWishlist(product.id)} aria-label="Remove from wishlist">
+                <Heart className="h-4 w-4 fill-red-500 text-red-500" />
+              </button>
+            </div>
+            <div className="p-4">
+              <p className="text-xs font-bold uppercase tracking-wide text-emerald-700 dark:text-gold">{product.brand}</p>
+              <Link to={`/product/${product.slug}`} className="mt-1 block text-base font-black hover:text-emeraldDeep dark:hover:text-gold">{product.title}</Link>
+              <div className="mt-2 flex items-end justify-between">
+                <strong className="text-xl font-black">{money(product.price)}</strong>
+                <button className="rounded-md bg-emeraldDeep px-3 py-2 text-sm font-black text-white shadow-glow" onClick={() => addToCart(product)}>Add to cart</button>
+              </div>
+            </div>
+          </motion.article>
+        ))}
+      </div>
+    </PageShell>
   );
 }
 
