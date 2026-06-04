@@ -457,7 +457,7 @@ function Header() {
           <Menu />
         </button>
         <Link to="/" className="flex min-w-max items-center gap-2">
-          <LazyImage src="/assets/loggo.jpeg" alt="Dan Mega Kitchen Wares" className="h-11 w-11 rounded-md object-cover" />
+          <img src="/assets/loggo.jpeg" alt="Dan Mega Kitchen Wares" className="h-11 w-11 rounded-md object-cover" loading="eager" />
           <span>
             <span className="block text-sm font-black leading-4 sm:text-base">Dan Mega</span>
             <span className="block text-xs font-semibold text-emerald-700 dark:text-gold">Kitchen Wares</span>
@@ -484,7 +484,7 @@ function Header() {
                     </>
                   ) : (
                     <>
-                      <img src={item.image} alt="" className="h-10 w-10 rounded object-cover" />
+                      <LazyImage src={item.image} alt="" className="h-10 w-10 rounded object-cover" />
                       <div className="min-w-0">
                         <span className="block text-sm font-bold line-clamp-1">{item.title}</span>
                         <span className="text-xs text-emeraldDeep dark:text-gold">{money(item.price)}</span>
