@@ -432,12 +432,20 @@ function Header() {
       p.title.toLowerCase().includes(query) || 
       p.brand.toLowerCase().includes(query) ||
       (p.imageName && p.imageName.toLowerCase().includes(query))
-    ).slice(0, 5);
-    return [...categoryMatches.map(c => ({ type: 'category', ...c })), ...productMatches.map(p => ({ type: 'product', ...p }))].slice(0, 8);
+    );
+    const allResults = [...categoryMatches.map(c => ({ type: 'category', ...c })), ...productMatches.map(p => ({ type: 'product', ...p }))];
+    if (allResults.length === 0) return [];
+    return [...allResults.slice(0, 14), { type: 'view-all', id: 'view-all', query: searchQuery }];
   }, [searchQuery]);
 
   const handleSearchSelect = (item) => {
-    if (item.type === 'category') {
+    if (item.type === 'view-all') {
+      navigate('/');
+      setTimeout(() => {
+        const element = document.getElementById('catalog');
+        element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    } else if (item.type === 'category') {
       navigate('/');
       setTimeout(() => {
         const element = document.getElementById(item.id);
@@ -456,6 +464,9 @@ function Header() {
         <button className="rounded-full p-2 text-emeraldDeep dark:text-gold lg:hidden" onClick={() => setMenuOpen(!menuOpen)} aria-label="Open menu">
           <Menu />
         </button>
+        <button className="rounded-full p-2 text-emeraldDeep dark:text-gold md:hidden" onClick={() => setSearchOpen(true)} aria-label="Open search">
+          <Search />
+        </button>
         <Link to="/" className="flex min-w-max items-center gap-2">
           <img src="/assets/loggo.jpeg" alt="Dan Mega Kitchen Wares" className="h-11 w-11 rounded-md object-cover" loading="eager" />
           <span>
@@ -471,29 +482,37 @@ function Header() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => setSearchOpen(true)}
-            onBlur={() => setTimeout(() => setSearchOpen(false), 200)}
+            onBlur={() => setTimeout(() => setSearchQuery(''), 200)}
           />
-          {searchOpen && searchSuggestions.length > 0 && (
-            <motion.div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-md shadow-lg max-h-96 overflow-y-auto z-50" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
-              {searchSuggestions.map((item) => (
-                <button key={`${item.type}-${item.id}`} className="w-full text-left px-4 py-2 hover:bg-emerald-50 dark:hover:bg-white/10 flex items-center gap-3 border-b border-gray-100 dark:border-white/5 last:border-b-0" onClick={() => handleSearchSelect(item)}>
-                  {item.type === 'category' ? (
-                    <>
-                      <span className="text-emeraldDeep dark:text-gold font-bold text-xs">CATEGORY</span>
-                      <span className="font-bold">{item.name}</span>
-                    </>
-                  ) : (
-                    <>
-                      <LazyImage src={item.image} alt="" className="h-10 w-10 rounded object-cover" />
-                      <div className="min-w-0">
-                        <span className="block text-sm font-bold line-clamp-1">{item.title}</span>
-                        <span className="text-xs text-emeraldDeep dark:text-gold">{money(item.price)}</span>
-                      </div>
-                    </>
-                  )}
-                </button>
-              ))}
-            </motion.div>
+          {searchOpen && searchQuery.trim() && (
+            searchSuggestions.length > 0 ? (
+              <motion.div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-md shadow-lg max-h-96 overflow-y-auto z-50" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
+                {searchSuggestions.map((item) => (
+                  <button key={`${item.type}-${item.id}`} className="w-full text-left px-4 py-2 hover:bg-emerald-50 dark:hover:bg-white/10 flex items-center gap-3 border-b border-gray-100 dark:border-white/5 last:border-b-0" onClick={() => handleSearchSelect(item)}>
+                    {item.type === 'view-all' ? (
+                      <span className="text-emeraldDeep dark:text-gold font-bold text-xs">VIEW ALL RESULTS</span>
+                    ) : item.type === 'category' ? (
+                      <>
+                        <span className="text-emeraldDeep dark:text-gold font-bold text-xs">CATEGORY</span>
+                        <span className="font-bold">{item.name}</span>
+                      </>
+                    ) : (
+                      <>
+                        <LazyImage src={item.image} alt="" className="h-10 w-10 rounded object-cover" />
+                        <div className="min-w-0">
+                          <span className="block text-sm font-bold line-clamp-1">{item.title}</span>
+                          <span className="text-xs text-emeraldDeep dark:text-gold">{money(item.price)}</span>
+                        </div>
+                      </>
+                    )}
+                  </button>
+                ))}
+              </motion.div>
+            ) : (
+              <motion.div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-md shadow-lg p-4 z-50" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
+                No products found for "{searchQuery}"
+              </motion.div>
+            )
           )}
         </div>
         <div className="ml-auto flex items-center gap-1">
@@ -513,6 +532,60 @@ function Header() {
           </button>
         </div>
       </div>
+      <AnimatePresence>
+        {searchOpen && (
+          <motion.div 
+            className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-gray-950 md:hidden" 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }}
+            onClick={() => setSearchOpen(false)}
+          >
+            <div className="relative flex w-full items-center gap-2 border-b border-gray-100 bg-white px-4 py-3 dark:border-white/10 dark:bg-gray-900" onClick={(e) => e.stopPropagation()}>
+              <Search className="h-5 w-5 text-gray-400" />
+              <input
+                className="w-full bg-transparent text-sm outline-none"
+                placeholder="Search products..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && searchSuggestions[0] && handleSearchSelect(searchSuggestions[0])}
+                autoFocus
+              />
+              <button onClick={() => setSearchOpen(false)} className="rounded-full p-2 hover:bg-gray-100 dark:hover:bg-white/10">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            {searchQuery.trim() && (
+              searchSuggestions.length > 0 ? (
+                <div className="overflow-y-auto px-4 py-2" onClick={(e) => e.stopPropagation()}>
+                  {searchSuggestions.map((item) => (
+                    <button key={`${item.type}-${item.id}-mobile`} className="w-full text-left py-3 border-b border-gray-100 dark:border-white/10 last:border-b-0 flex items-center gap-3" onClick={() => handleSearchSelect(item)}>
+                      {item.type === 'view-all' ? (
+                        <span className="font-bold text-emeraldDeep dark:text-gold">View all results for "{searchQuery}"</span>
+                      ) : item.type === 'category' ? (
+                        <>
+                          <span className="text-emeraldDeep dark:text-gold font-bold text-xs">CATEGORY</span>
+                          <span className="font-bold">{item.name}</span>
+                        </>
+                      ) : (
+                        <>
+                          <LazyImage src={item.image} alt="" className="h-12 w-12 rounded object-cover" />
+                          <div className="min-w-0 flex-1">
+                            <span className="block text-sm font-bold line-clamp-1">{item.title}</span>
+                            <span className="text-xs text-emeraldDeep dark:text-gold">{money(item.price)}</span>
+                          </div>
+                        </>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">No products found for "{searchQuery}"</div>
+              )
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
       <nav className={`${menuOpen ? 'block' : 'hidden'} border-t border-gray-100 bg-white dark:border-white/10 dark:bg-gray-950 lg:block`}>
         <div className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-2 text-sm font-semibold lg:flex-row lg:items-center lg:gap-2 lg:overflow-x-auto">
           {['Cookware', 'Dinner Sets', 'Kitchen Appliances', 'Storage Solutions', 'Glassware', 'Cutlery', 'Hotpots', 'Kitchen Organizers', 'Bakeware', 'Cleaning Supplies', 'Restaurant Supplies', 'Wholesale Packages', 'New Arrivals', 'Best Sellers', 'Offers'].map((item) => (
@@ -935,16 +1008,11 @@ function ProductDetails() {
             <div className="flex items-end gap-3"><strong className="text-4xl font-black">{money(product.price)}</strong>{product.oldPrice && <span className="text-lg text-gray-400 line-through">{money(product.oldPrice)}</span>}</div>
             <p className="mt-3 text-gray-600 dark:text-gray-300">{product.description}</p>
             <div className="mt-5 grid gap-2 sm:grid-cols-2">{product.specs.map((spec) => <span key={spec} className="flex items-center gap-2 text-sm"><BadgeCheck className="h-4 w-4 text-emerald-600" /> {spec}</span>)}</div>
-            <div className="mt-6 flex flex-wrap items-center gap-3">
+<div className="mt-6 flex flex-wrap items-center gap-3">
               <Quantity qty={qty} setQty={setQty} />
               <button className="rounded-md bg-emeraldDeep px-6 py-3 font-black text-white shadow-glow" onClick={() => addToCart(product, qty)}>Add to cart</button>
               <button className="rounded-md border border-gray-200 px-4 py-3 font-bold dark:border-white/10" onClick={() => toggleWishlist(product.id)}>{wishlist.includes(product.id) ? 'Saved' : 'Save to wishlist'}</button>
             </div>
-          </div>
-          <div className="mt-5 flex flex-wrap gap-2">
-            <ShareButton icon={<Facebook />} label="Facebook" />
-            <ShareButton icon={<ShoppingBag />} label="WhatsApp" />
-            <ShareButton icon={<Instagram />} label="Instagram" />
           </div>
         </div>
       </div>
@@ -960,208 +1028,6 @@ function ProductDetails() {
       </div>
       <SectionHeading eyebrow="Related products" title="Customers also viewed" />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{related.map((item) => <ProductCard product={item} key={item.id} />)}</div>
-    </PageShell>
-  );
-}
-
-function ShareButton({ icon, label }) {
-  const { slug } = useParams();
-  const product = products.find((item) => item.slug === slug) || products[0];
-  const productUrl = `${window.location.origin}/product/${product.slug}`;
-  const productTitle = product.title;
-  
-  const shareLinks = {
-    Facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productUrl)}`,
-    WhatsApp: `https://wa.me/?text=${encodeURIComponent(`Check out this product: ${productTitle} - ${productUrl}`)}`,
-    Instagram: `https://www.instagram.com/`
-  };
-  
-  const handleShare = () => {
-    if (label === 'Instagram') {
-      window.open(shareLinks.Instagram, '_blank');
-    } else if (shareLinks[label]) {
-      window.open(shareLinks[label], '_blank');
-    }
-  };
-  
-  return <button onClick={handleShare} className="inline-flex items-center gap-2 rounded-md border border-gray-200 px-3 py-2 text-sm font-bold hover:bg-emerald-50 dark:border-white/10 dark:hover:bg-white/10">{React.cloneElement(icon, { className: 'h-4 w-4' })}{label}</button>;
-}
-
-function PromoSections() {
-  const best = products.filter((p) => p.badge === 'Best Seller').slice(0, 4);
-  const arrivals = products.filter((p) => p.badge === 'New Arrival').slice(0, 4);
-  return (
-    <>
-      <section id="flash-sales" className="mx-auto max-w-7xl px-4 py-14">
-        <div className="rounded-xl bg-emeraldDeep p-5 text-white shadow-glow sm:p-8">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div><p className="font-black uppercase tracking-wide text-gold">Flash sales</p><h2 className="mt-2 text-3xl font-black">Limited stock offers ending soon</h2></div>
-            <Countdown />
-          </div>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{products.filter((p) => p.discount >= 18).slice(0, 4).map((p) => <ProductMini product={p} key={p.id} />)}</div>
-        </div>
-      </section>
-      <section className="mx-auto grid max-w-7xl gap-8 px-4 py-6 lg:grid-cols-2">
-        <Shelf title="Best sellers" products={best} subtitle="Trending, most viewed, and highest-converting products" />
-        <Shelf title="New arrivals" products={arrivals} subtitle="Recently added inventory for modern kitchens" />
-      </section>
-      <section className="mx-auto max-w-7xl px-4 py-14">
-        <div className="grid gap-4 lg:grid-cols-3">
-          {['Modern home kitchen setup inspiration', 'Restaurant and hotel supply success stories', 'Wedding and family package deals'].map((title, index) => (
-            <div key={title} className="relative min-h-72 overflow-hidden rounded-lg">
-              <LazyImage src={productImages[(index + 5) % productImages.length]} alt="" className="absolute inset-0 h-full w-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-              <div className="absolute bottom-0 p-5 text-white"><h3 className="text-2xl font-black">{title}</h3><p className="mt-2 text-sm text-white/80">Curated by Dan Mega Kitchen Wares for Kenya homes and institutions.</p></div>
-            </div>
-          ))}
-        </div>
-      </section>
-    </>
-  );
-}
-
-function Shelf({ title, subtitle, products: shelfProducts }) {
-  return (
-    <div className="rounded-lg border border-gray-100 bg-white p-5 dark:border-white/10 dark:bg-gray-900">
-      <h2 className="text-2xl font-black">{title}</h2>
-      <p className="mt-1 text-sm text-gray-500 dark:text-gray-300">{subtitle}</p>
-      <div className="mt-5 grid gap-3">{shelfProducts.map((product) => <ProductMini product={product} key={product.id} light />)}</div>
-    </div>
-  );
-}
-
-function ProductMini({ product, light }) {
-  return (
-    <Link to={`/product/${product.slug}`} className={`flex gap-3 rounded-md p-3 ${light ? 'bg-stone-50 dark:bg-gray-950' : 'bg-white/10'}`}>
-      <LazyImage src={product.image} alt="" className="h-20 w-20 rounded object-cover" />
-      <span className="min-w-0">
-        <strong className="line-clamp-2 text-sm">{product.title}</strong>
-        <span className={`mt-1 block text-sm font-black ${light ? 'text-emeraldDeep dark:text-gold' : 'text-gold'}`}>{money(product.price)}</span>
-        <span className="mt-1 block text-xs">{product.stock}</span>
-      </span>
-    </Link>
-  );
-}
-
-function Countdown() {
-  const [time, setTime] = useState({ h: 11, m: 42, s: 9 });
-  useEffect(() => {
-    const timer = setInterval(() => setTime((t) => {
-      const total = Math.max(0, t.h * 3600 + t.m * 60 + t.s - 1);
-      return { h: Math.floor(total / 3600), m: Math.floor((total % 3600) / 60), s: total % 60 };
-    }), 1000);
-    return () => clearInterval(timer);
-  }, []);
-  return <div className="flex gap-2">{['h', 'm', 's'].map((unit) => <span key={unit} className="grid h-16 w-16 place-items-center rounded-md bg-white/12 text-center"><strong className="block text-xl">{String(time[unit]).padStart(2, '0')}</strong><small>{unit}</small></span>)}</div>;
-}
-
-function Reviews() {
-  return (
-    <section className="bg-white py-14 dark:bg-gray-900">
-      <div className="mx-auto max-w-7xl px-4">
-        <SectionHeading eyebrow="Verified buyers" title="Trusted by households and institutions" action="Review statistics: 96% recommend us" />
-        <div className="grid gap-4 lg:grid-cols-3">{reviews.map((review) => <ReviewCard review={review} key={review.name} />)}</div>
-      </div>
-    </section>
-  );
-}
-
-function ReviewCard({ review }) {
-  return (
-    <article className="rounded-lg border border-gray-100 bg-stone-50 p-5 dark:border-white/10 dark:bg-gray-950">
-      <div className="flex items-center gap-3">
-        <LazyImage src={review.image} alt={review.name} className="h-12 w-12 rounded-full object-cover" />
-        <div><strong>{review.name}</strong><p className="text-sm text-gray-500">{review.location} · Verified buyer</p></div>
-      </div>
-      <div className="mt-3"><Stars rating={review.rating} /></div>
-      <p className="mt-3 leading-7 text-gray-600 dark:text-gray-300">{review.text}</p>
-      <p className="mt-3 text-sm font-bold text-emerald-700 dark:text-gold">{review.helpful} customers found this helpful</p>
-    </article>
-  );
-}
-
-function DeliveryFAQ() {
-  return (
-    <section className="mx-auto grid max-w-7xl gap-8 px-4 py-14 lg:grid-cols-2">
-      <div className="rounded-lg bg-emeraldDeep p-6 text-white shadow-glow">
-        <p className="font-black uppercase tracking-wide text-gold">Delivery coverage</p>
-        <h2 className="mt-2 text-3xl font-black">Narok delivery and Kenya-wide dispatch</h2>
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          {[[Truck, 'Narok town same-day delivery'], [MapPin, 'Kenya-wide parcel dispatch'], [Clock, '1-3 day timelines by location'], [PackageCheck, 'Safe packaging for fragile items']].map(([Icon, text]) => <div key={text} className="rounded-md bg-white/10 p-4"><Icon className="mb-3 h-6 w-6 text-gold" /><strong>{text}</strong></div>)}
-        </div>
-      </div>
-      <div className="rounded-lg border border-gray-100 bg-white p-6 dark:border-white/10 dark:bg-gray-900">
-        <p className="font-black uppercase tracking-wide text-emerald-700 dark:text-gold">FAQ</p>
-        {['How do I order?', 'Do you sell wholesale?', 'Can I return a product?', 'How much is delivery?'].map((q, index) => (
-          <details key={q} className="border-b border-gray-100 py-4 dark:border-white/10" open={index === 0}>
-            <summary className="cursor-pointer font-black">{q}</summary>
-            <p className="mt-2 text-gray-600 dark:text-gray-300">Use the cart, click Place Order, and WhatsApp opens with a complete order summary. Our team confirms availability, delivery cost, and payment details.</p>
-          </details>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function AccountPage() {
-  return (
-    <PageShell>
-      <div className="max-w-2xl">
-        <h1 className="text-4xl font-black">My Account</h1>
-        <div className="mt-8 rounded-lg border border-gray-100 bg-white p-6 dark:border-white/10 dark:bg-gray-900">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="h-16 w-16 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center">
-              <User className="h-8 w-8 text-emeraldDeep dark:text-gold" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-black">Welcome!</h2>
-              <p className="text-gray-500 dark:text-gray-300">Sign in to view your orders and saved items</p>
-            </div>
-          </div>
-          <div className="space-y-3">
-            <input type="email" placeholder="Email address" className="w-full rounded-md border border-gray-200 bg-stone-50 px-4 py-3 text-sm outline-none focus:border-emeraldDeep dark:border-white/10 dark:bg-gray-950" />
-            <input type="password" placeholder="Password" className="w-full rounded-md border border-gray-200 bg-stone-50 px-4 py-3 text-sm outline-none focus:border-emeraldDeep dark:border-white/10 dark:bg-gray-950" />
-            <button className="w-full rounded-md bg-emeraldDeep px-4 py-3 font-black text-white shadow-glow">Sign In</button>
-          </div>
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-500 dark:text-gray-300">Don't have an account? <span className="font-bold text-emeraldDeep dark:text-gold cursor-pointer hover:underline">Create one</span></p>
-          </div>
-        </div>
-        <div className="mt-8 grid gap-4 md:grid-cols-3">
-          <div className="rounded-lg bg-stone-50 p-6 dark:bg-gray-900">
-            <ShoppingBag className="mb-3 h-6 w-6 text-emeraldDeep dark:text-gold" />
-            <h3 className="font-black">Your Orders</h3>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-300">Track and manage your orders</p>
-          </div>
-          <div className="rounded-lg bg-stone-50 p-6 dark:bg-gray-900">
-            <Heart className="mb-3 h-6 w-6 text-emeraldDeep dark:text-gold" />
-            <h3 className="font-black">Wishlist</h3>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-300">Your saved items and favorites</p>
-          </div>
-          <div className="rounded-lg bg-stone-50 p-6 dark:bg-gray-900">
-            <MapPin className="mb-3 h-6 w-6 text-emeraldDeep dark:text-gold" />
-            <h3 className="font-black">Addresses</h3>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-300">Manage delivery addresses</p>
-          </div>
-        </div>
-      </div>
-    </PageShell>
-  );
-}
-
-function WholesalePage() {
-  return (
-    <PageShell>
-      <div className="rounded-xl bg-emeraldDeep p-8 text-white shadow-glow">
-        <p className="font-black uppercase tracking-wide text-gold">Wholesale buyers</p>
-        <h1 className="mt-2 text-4xl font-black">Bulk kitchenware packages for retailers, hotels, restaurants, schools, and weddings</h1>
-        <p className="mt-4 max-w-3xl text-white/80">Dan Mega Kitchen Wares supports high-volume orders with curated bundles, flexible sourcing, and WhatsApp quotation support from Narok to the rest of Kenya.</p>
-      </div>
-      <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {['Restaurant supplies', 'Hotel supplies', 'School supplies', 'Wedding packages'].map((item) => <div key={item} className="rounded-lg border border-gray-100 bg-white p-5 dark:border-white/10 dark:bg-gray-900"><Banknote className="mb-4 h-7 w-7 text-emeraldDeep dark:text-gold" /><h3 className="text-xl font-black">{item}</h3><p className="mt-2 text-gray-500 dark:text-gray-300">Bulk-ready product lists, competitive pricing, and delivery support.</p></div>)}
-      </div>
-      <SectionHeading eyebrow="Wholesale package deals" title="Start with proven bundles" />
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{products.filter((p) => p.category === 'Wholesale Packages' || p.category === 'Restaurant Supplies').slice(0, 8).map((product) => <ProductCard product={product} key={product.id} />)}</div>
     </PageShell>
   );
 }
@@ -1316,6 +1182,95 @@ function WishlistPage() {
         ))}
       </div>
     </PageShell>
+  );
+}
+
+function WholesalePage() {
+  const wholesaleProducts = products.filter(p => p.category === 'Wholesale Packages');
+  return (
+    <PageShell>
+      <SectionHeading eyebrow="Wholesale" title="Bulk packages for retailers & institutions" action="Ready to order" />
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {wholesaleProducts.map((product) => <ProductCard product={product} key={product.id} />)}
+      </div>
+    </PageShell>
+  );
+}
+
+function AccountPage() {
+  return (
+    <PageShell>
+      <h1 className="text-4xl font-black">My Account</h1>
+      <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">Account features coming soon.</p>
+    </PageShell>
+  );
+}
+
+function PromoSections() {
+  const flashSales = products.filter(p => p.discount >= 15).slice(0, 4);
+  return (
+    <section id="flash-sales" className="bg-emeraldDeep py-14 text-white">
+      <div className="mx-auto max-w-7xl px-4">
+        <SectionHeading eyebrow="Flash Sales" title="Limited time offers" action="Up to 28% off" />
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {flashSales.map((product) => <ProductCard product={product} key={product.id} />)}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Reviews() {
+  return (
+    <section className="bg-white py-14 dark:bg-gray-900">
+      <div className="mx-auto max-w-7xl px-4">
+        <SectionHeading eyebrow="Reviews" title="What our customers say" action={`${reviews.length} verified reviews`} />
+        <div className="mt-6 grid gap-4 md:grid-cols-3">
+          {reviews.map((review) => <ReviewCard review={review} key={review.name} />)}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ReviewCard({ review }) {
+  return (
+    <motion.div className="rounded-lg border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-gray-950" initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+      <div className="flex items-start gap-3">
+        <LazyImage src={review.image} alt="" className="h-12 w-12 rounded-full object-cover" />
+        <div>
+          <p className="font-bold">{review.name}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-300">{review.location}</p>
+        </div>
+      </div>
+      <Stars rating={review.rating} />
+      <p className="mt-3 text-sm">{review.text}</p>
+      <p className="mt-2 text-xs text-emeraldDeep dark:text-gold">{review.helpful} found helpful</p>
+    </motion.div>
+  );
+}
+
+function DeliveryFAQ() {
+  const faqs = [
+    { q: 'How fast is delivery?', a: 'Orders placed before 2pm are delivered within 24 hours in Narok. Upcountry delivery takes 2-3 days.' },
+    { q: 'Do you offer wholesale pricing?', a: 'Yes, bulk discounts start at 50 units per item. Contact us via WhatsApp for custom quotes.' },
+    { q: 'What is your return policy?', a: 'Unused items in original packaging can be returned within 7 days for a full refund.' },
+    { q: 'Do you deliver outside Narok?', a: 'Yes, we deliver nationwide via courier. Delivery charges apply based on distance.' },
+  ];
+  return (
+    <section className="bg-stone-50 py-14 dark:bg-gray-950">
+      <div className="mx-auto max-w-7xl px-4">
+        <SectionHeading eyebrow="FAQ" title="Delivery & returns" />
+        <div className="mt-6 grid gap-4 md:grid-cols-2">
+          {faqs.map((faq, i) => (
+            <div key={i} className="rounded-lg bg-white p-5 shadow-sm dark:bg-gray-900">
+              <h4 className="font-bold">{faq.q}</h4>
+              <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{faq.a}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
