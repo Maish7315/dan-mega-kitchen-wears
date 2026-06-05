@@ -460,24 +460,24 @@ function Header() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-emerald-900/10 bg-white/95 backdrop-blur-xl dark:border-white/10 dark:bg-gray-950/92">
-      <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3">
+      <div className="mx-auto flex max-w-7xl items-center gap-2 px-3 py-2 sm:gap-3 sm:px-4 sm:py-3 header-inner">
         <button className="rounded-full p-2 text-emeraldDeep dark:text-gold lg:hidden" onClick={() => setMenuOpen(!menuOpen)} aria-label="Open menu">
           <Menu />
         </button>
         <button className="rounded-full p-2 text-emeraldDeep dark:text-gold md:hidden" onClick={() => setSearchOpen(true)} aria-label="Open search">
           <Search />
         </button>
-        <Link to="/" className="flex min-w-max items-center gap-2">
-          <img src="/assets/loggo.jpeg" alt="Dan Mega Kitchen Wares" className="h-11 w-11 rounded-md object-cover" loading="eager" />
-          <span>
-            <span className="block text-sm font-black leading-4 sm:text-base">Dan Mega</span>
-            <span className="block text-xs font-semibold text-emerald-700 dark:text-gold">Kitchen Wares</span>
+        <Link to="/" className="flex min-w-0 items-center gap-2 overflow-hidden">
+          <img src="/assets/loggo.jpeg" alt="Dan Mega Kitchen Wares" className="h-9 w-9 shrink-0 rounded-md object-cover sm:h-11 sm:w-11" loading="eager" />
+          <span className="min-w-0 overflow-hidden">
+            <span className="block text-xs font-black leading-4 sm:text-base">Dan Mega</span>
+            <span className="block text-[10px] font-semibold leading-tight text-emerald-700 dark:text-gold sm:text-xs">Kitchen Wares</span>
           </span>
         </Link>
-        <div className="hidden flex-1 items-center rounded-md border border-gray-200 bg-gray-50 px-3 py-2 dark:border-white/10 dark:bg-white/5 md:flex relative">
-          <Search className="mr-2 h-5 w-5 text-gray-400" />
+        <div className="hidden flex-1 items-center rounded-md border border-gray-200 bg-gray-50 px-3 py-2 dark:border-white/10 dark:bg-white/5 md:flex relative min-w-0">
+          <Search className="mr-2 h-5 w-5 shrink-0 text-gray-400" />
           <input 
-            className="w-full bg-transparent text-sm outline-none" 
+            className="w-full bg-transparent text-sm outline-none min-w-0" 
             placeholder="Search cookware, hotpots, dinner sets, restaurant supplies..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -499,7 +499,7 @@ function Header() {
                     ) : (
                       <>
                         <LazyImage src={item.image} alt="" className="h-10 w-10 rounded object-cover" />
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex-1">
                           <span className="block text-sm font-bold line-clamp-1">{item.title}</span>
                           <span className="text-xs text-emeraldDeep dark:text-gold">{money(item.price)}</span>
                         </div>
@@ -515,20 +515,20 @@ function Header() {
             )
           )}
         </div>
-        <div className="ml-auto flex items-center gap-1">
+        <div className="ml-auto flex items-center gap-0.5 header-icons">
           <Link to="/wishlist" className="relative rounded-full p-2 hover:bg-emerald-50 dark:hover:bg-white/10" aria-label="Wishlist">
-            <Heart className="h-5 w-5" />
-            {wishlist.length > 0 && <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-gold px-1 text-xs font-black text-emeraldDeep">{wishlist.length}</span>}
+            <Heart className="h-4 w-4 sm:h-5 sm:w-5" />
+            {wishlist.length > 0 && <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-gold px-0.5 text-[10px] font-black text-emeraldDeep">{wishlist.length}</span>}
           </Link>
           <button className="relative rounded-full p-2 hover:bg-emerald-50 dark:hover:bg-white/10" onClick={() => setCartOpen(true)} aria-label="Open cart">
-            <ShoppingCart className="h-5 w-5" />
-            {cartItems.length > 0 && <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-gold px-1 text-xs font-black text-emeraldDeep">{cartItems.reduce((sum, item) => sum + item.qty, 0)}</span>}
+            <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
+            {cartItems.length > 0 && <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-gold px-0.5 text-[10px] font-black text-emeraldDeep">{cartItems.reduce((sum, item) => sum + item.qty, 0)}</span>}
           </button>
           <Link to="/account" className="rounded-full p-2 hover:bg-emerald-50 dark:hover:bg-white/10" aria-label="Account">
-            <User className="h-5 w-5" />
+            <User className="h-4 w-4 sm:h-5 sm:w-5" />
           </Link>
           <button className="rounded-full p-2 hover:bg-emerald-50 dark:hover:bg-white/10" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} aria-label="Toggle theme">
-            {theme === 'dark' ? <Sun className="h-5 w-5 text-gold" /> : <Moon className="h-5 w-5" />}
+            {theme === 'dark' ? <Sun className="h-4 w-4 text-gold" /> : <Moon className="h-4 w-4" />}
           </button>
         </div>
       </div>
@@ -541,10 +541,10 @@ function Header() {
             exit={{ opacity: 0 }}
             onClick={() => setSearchOpen(false)}
           >
-            <div className="relative flex w-full items-center gap-2 border-b border-gray-100 bg-white px-4 py-3 dark:border-white/10 dark:bg-gray-900" onClick={(e) => e.stopPropagation()}>
-              <Search className="h-5 w-5 text-gray-400" />
+            <div className="relative flex w-full items-center gap-2 border-b border-gray-100 bg-white px-3 py-3 dark:border-white/10 dark:bg-gray-900" onClick={(e) => e.stopPropagation()}>
+              <Search className="h-5 w-5 shrink-0 text-gray-400" />
               <input
-                className="w-full bg-transparent text-sm outline-none"
+                className="w-full bg-transparent text-sm outline-none min-w-0 search-mobile-input"
                 placeholder="Search products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -557,7 +557,7 @@ function Header() {
             </div>
             {searchQuery.trim() && (
               searchSuggestions.length > 0 ? (
-                <div className="overflow-y-auto px-4 py-2" onClick={(e) => e.stopPropagation()}>
+                <div className="overflow-y-auto px-3 py-2" onClick={(e) => e.stopPropagation()}>
                   {searchSuggestions.map((item) => (
                     <button key={`${item.type}-${item.id}-mobile`} className="w-full text-left py-3 border-b border-gray-100 dark:border-white/10 last:border-b-0 flex items-center gap-3" onClick={() => handleSearchSelect(item)}>
                       {item.type === 'view-all' ? (
@@ -586,18 +586,18 @@ function Header() {
           </motion.div>
         )}
       </AnimatePresence>
-      <nav className={`${menuOpen ? 'block' : 'hidden'} border-t border-gray-100 bg-white dark:border-white/10 dark:bg-gray-950 lg:block`}>
-        <div className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-2 text-sm font-semibold lg:flex-row lg:items-center lg:gap-2 lg:overflow-x-auto">
+      <nav className={`${menuOpen ? 'block' : 'hidden'} border-t border-gray-100 bg-white dark:border-white/10 dark:bg-gray-950 lg:block overflow-fix`}>
+        <div className="mx-auto flex max-w-7xl flex-col gap-1 px-3 py-2 text-sm font-semibold lg:flex-row lg:items-center lg:gap-2 lg:overflow-x-auto">
           {['Cookware', 'Dinner Sets', 'Kitchen Appliances', 'Storage Solutions', 'Glassware', 'Cutlery', 'Hotpots', 'Kitchen Organizers', 'Bakeware', 'Cleaning Supplies', 'Restaurant Supplies', 'Wholesale Packages', 'New Arrivals', 'Best Sellers', 'Offers'].map((item) => (
             <button key={item} onClick={() => {
               const element = document.getElementById(item.toLowerCase().replaceAll(' ', '-'));
               if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
               setMenuOpen(false);
-            }} className="min-w-max rounded-md px-3 py-2 hover:bg-emerald-50 hover:text-emeraldDeep dark:hover:bg-white/10">
+            }} className="min-w-max rounded-md px-2 py-2 hover:bg-emerald-50 hover:text-emeraldDeep dark:hover:bg-white/10 whitespace-nowrap">
               {item}
             </button>
           ))}
-          <Link to="/wholesale" className="rounded-md bg-emeraldDeep px-4 py-2 text-white shadow-glow lg:ml-auto">Wholesale</Link>
+          <Link to="/wholesale" className="rounded-md bg-emeraldDeep px-4 py-2 text-white shadow-glow lg:ml-auto text-center">Wholesale</Link>
         </div>
       </nav>
     </header>
@@ -620,7 +620,7 @@ function ProductImageGallery({ images, alt }) {
     const container = containerRef.current;
     if (!container) return;
     const rect = container.getBoundingClientRect();
-    const zoomLevel = 2.5;
+    const zoomLevel = 2;
     setZoomPos({
       x: e.clientX - rect.left,
       y: e.clientY - rect.top,
@@ -656,8 +656,8 @@ function ProductImageGallery({ images, alt }) {
 
       const container = containerRef.current;
       if (container) {
-        container.addEventListener('touchstart', handleTouchStartSwipe);
-        container.addEventListener('touchend', handleTouchEndSwipe);
+        container.addEventListener('touchstart', handleTouchStartSwipe, { passive: true });
+        container.addEventListener('touchend', handleTouchEndSwipe, { passive: true });
       }
       return () => {
         if (container) {
@@ -672,7 +672,7 @@ function ProductImageGallery({ images, alt }) {
     <div className="space-y-4">
       <div 
         ref={containerRef}
-        className="image-zoom-container relative h-[420px] w-full overflow-hidden rounded-lg border border-gray-100 bg-white dark:border-white/10 dark:bg-gray-900"
+        className="image-zoom-container relative h-[280px] sm:h-[360px] md:h-[420px] w-full overflow-hidden rounded-lg border border-gray-100 bg-white dark:border-white/10 dark:bg-gray-900"
         onMouseMove={!isMobile ? handleMouseMove : undefined}
         onMouseEnter={() => !isMobile && setShowZoom(true)}
         onMouseLeave={() => !isMobile && setShowZoom(false)}
@@ -706,7 +706,7 @@ function ProductImageGallery({ images, alt }) {
           />
         )}
       </div>
-      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+      <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-2 scrollbar-hide">
         {images.map((image, index) => (
           <button
             key={image}
@@ -719,7 +719,7 @@ function ProductImageGallery({ images, alt }) {
             <LazyImage 
               src={image} 
               alt={`${alt} thumbnail ${index + 1}`} 
-              className="h-20 w-20 object-cover"
+              className="h-16 w-16 sm:h-20 sm:w-20 object-cover"
             />
           </button>
         ))}
@@ -803,17 +803,17 @@ function Hero() {
         </motion.div>
       </AnimatePresence>
       <div className="absolute inset-0 bg-gradient-to-r from-emerald-950/95 via-emerald-950/72 to-black/20" />
-      <div className="relative mx-auto grid min-h-[78vh] max-w-7xl items-center px-4 py-16">
-        <motion.div className="max-w-3xl text-white" initial={{ y: 24, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.7 }}>
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-gold/40 bg-white/10 px-4 py-2 text-sm font-bold backdrop-blur-md">
+      <div className="relative mx-auto grid min-h-[78vh] max-w-7xl items-center px-4 py-12">
+        <motion.div className="max-w-3xl text-white w-full overflow-fix" initial={{ y: 24, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.7 }}>
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-gold/40 bg-white/10 px-3 py-2 text-xs font-bold backdrop-blur-md sm:text-sm">
             <Sparkles className="h-4 w-4 text-gold" /> Narok, Kenya premium kitchenware marketplace
           </div>
-          <h1 className="text-4xl font-black leading-tight sm:text-6xl lg:text-7xl">{slide.title}</h1>
-          <p className="mt-5 max-w-2xl text-base leading-8 text-white/88 sm:text-xl">{slide.note}</p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <a href="#catalog" className="rounded-md bg-gold px-6 py-3 font-black text-emeraldDeep shadow-gold">Shop Now</a>
-            <a href="#categories" className="rounded-md border border-white/30 bg-white/12 px-6 py-3 font-bold text-white backdrop-blur-md">Browse Categories</a>
-            <a href="#flash-sales" className="rounded-md border border-gold/60 px-6 py-3 font-bold text-gold">View Offers</a>
+          <h1 className="text-4xl font-black leading-tight sm:text-6xl lg:text-7xl hero-title">{slide.title}</h1>
+          <p className="mt-5 max-w-2xl text-base leading-8 text-white/88 sm:text-xl hero-note">{slide.note}</p>
+          <div className="mt-8 flex gap-3 hero-cta">
+            <a href="#catalog" className="rounded-md bg-gold px-4 py-2.5 font-black text-emeraldDeep shadow-gold text-sm sm:text-base">Shop Now</a>
+            <a href="#categories" className="rounded-md border border-white/30 bg-white/12 px-4 py-2.5 font-bold text-white backdrop-blur-md text-sm sm:text-base">Browse Categories</a>
+            <a href="#flash-sales" className="rounded-md border border-gold/60 px-4 py-2.5 font-bold text-gold text-sm sm:text-base">View Offers</a>
           </div>
         </motion.div>
       </div>
@@ -828,17 +828,17 @@ function Hero() {
 
 function TrustStrip() {
   return (
-    <section className="border-y border-gray-100 bg-white py-5 dark:border-white/10 dark:bg-gray-900">
-      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-4 px-4 md:grid-cols-4">
+    <section className="border-y border-gray-100 bg-white py-4 sm:py-5 dark:border-white/10 dark:bg-gray-900">
+      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-3 sm:gap-4 px-3 sm:px-4 md:grid-cols-4">
         {[
           ['12+', 'Years experience', Store],
           ['38K+', 'Products sold', ShoppingBag],
           ['9.6K+', 'Happy customers', BadgeCheck],
           ['4.8/5', 'Google reviews', Star],
         ].map(([value, label, Icon]) => (
-          <div key={label} className="flex items-center gap-3">
-            <span className="grid h-11 w-11 place-items-center rounded-md bg-emerald-50 text-emeraldDeep dark:bg-white/10 dark:text-gold"><Icon className="h-5 w-5" /></span>
-            <span><strong className="block text-xl font-black">{value}</strong><span className="text-sm text-gray-500 dark:text-gray-300">{label}</span></span>
+          <div key={label} className="flex items-center gap-2 sm:gap-3">
+            <span className="grid h-9 w-9 sm:h-11 sm:w-11 shrink-0 place-items-center rounded-md bg-emerald-50 text-emeraldDeep dark:bg-white/10 dark:text-gold"><Icon className="h-4 w-4 sm:h-5 sm:w-5" /></span>
+            <span className="min-w-0 overflow-fix"><strong className="block text-base sm:text-xl font-black">{value}</strong><span className="text-[10px] sm:text-sm text-gray-500 dark:text-gray-300 leading-tight">{label}</span></span>
           </div>
         ))}
       </div>
@@ -848,18 +848,18 @@ function TrustStrip() {
 
 function FeaturedCategories() {
   return (
-    <section id="categories" className="mx-auto max-w-7xl px-4 py-14">
+    <section id="categories" className="mx-auto max-w-7xl px-3 py-10 sm:px-4 sm:py-14">
       <SectionHeading eyebrow="Shop by category" title="Browse every kitchen department" action="200+ products ready to order" />
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4">
         {categories.slice(0, 12).map((category, index) => (
-          <motion.a id={category.id} href="#catalog" key={category.name} className="group overflow-hidden rounded-lg border border-gray-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-glow dark:border-white/10 dark:bg-gray-900" initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.03 }}>
-            <div className="relative h-44 overflow-hidden">
+          <motion.a id={category.id} href="#catalog" key={category.name} className="group overflow-hidden rounded-lg border border-gray-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-glow dark:border-white/10 dark:bg-gray-900 overflow-fix" initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.03 }}>
+            <div className="relative h-32 sm:h-44 overflow-hidden">
               <LazyImage src={category.image} alt={category.name} className="h-full w-full object-cover" />
-              <span className="absolute left-3 top-3 rounded-full bg-white/92 px-3 py-1 text-xs font-black text-emeraldDeep">{category.count} items</span>
+              <span className="absolute left-2 top-2 rounded-full bg-white/92 px-2 py-0.5 text-[10px] sm:text-xs font-black text-emeraldDeep">{category.count} items</span>
             </div>
-            <div className="p-4">
-              <h3 className="text-lg font-black">{category.name}</h3>
-              <p className="mt-2 line-clamp-2 text-sm leading-6 text-gray-500 dark:text-gray-300">{category.description}</p>
+            <div className="p-3 sm:p-4">
+              <h3 className="text-sm sm:text-lg font-black overflow-fix">{category.name}</h3>
+              <p className="mt-1.5 sm:mt-2 line-clamp-2 text-xs sm:text-sm leading-5 sm:leading-6 text-gray-500 dark:text-gray-300">{category.description}</p>
             </div>
           </motion.a>
         ))}
@@ -899,7 +899,7 @@ function ProductMarketplace() {
                 {['Best Selling', 'Newest', 'Highest Rated', 'Price Low'].map((sort) => <option key={sort}>{sort}</option>)}
               </select>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-4 grid-cols-1 product-card-grid">
               {filtered.slice(0, visible).map((product) => <ProductCard product={product} key={product.id} />)}
             </div>
             {visible < filtered.length && (
@@ -948,34 +948,34 @@ function FilterSelect({ label, value, options, onChange }) {
 function ProductCard({ product }) {
   const { addToCart, wishlist, toggleWishlist } = useStore();
   return (
-    <motion.article className="group overflow-hidden rounded-lg border border-gray-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-glow dark:border-white/10 dark:bg-gray-950" initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-      <div className="relative h-56 overflow-hidden bg-gray-100">
+    <motion.article className="group overflow-hidden rounded-lg border border-gray-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-glow dark:border-white/10 dark:bg-gray-950 overflow-fix">
+      <div className="relative h-48 sm:h-56 overflow-hidden bg-gray-100">
         <Link to={`/product/${product.slug}`}><LazyImage src={product.image} alt={product.title} className="h-full w-full object-cover" /></Link>
-        <div className="absolute left-3 top-3 flex flex-col gap-2">
-          <span className="rounded-full bg-emeraldDeep px-3 py-1 text-xs font-black text-white">{product.badge}</span>
-          {product.discount > 0 && <span className="rounded-full bg-orange-500 px-3 py-1 text-xs font-black text-white">-{product.discount}%</span>}
+        <div className="absolute left-2 top-2 flex flex-col gap-1.5">
+          <span className="rounded-full bg-emeraldDeep px-2 py-0.5 text-[10px] sm:text-xs font-black text-white">{product.badge}</span>
+          {product.discount > 0 && <span className="rounded-full bg-orange-500 px-2 py-0.5 text-[10px] sm:text-xs font-black text-white">-{product.discount}%</span>}
         </div>
-        <button className="absolute right-3 top-3 grid h-10 w-10 place-items-center rounded-full bg-white/95 shadow-sm" onClick={() => toggleWishlist(product.id)} aria-label="Save to wishlist">
-          <Heart className={`h-5 w-5 ${wishlist.includes(product.id) ? 'fill-red-500 text-red-500' : 'text-emeraldDeep'}`} />
+        <button className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-white/95 shadow-sm" onClick={() => toggleWishlist(product.id)} aria-label="Save to wishlist">
+          <Heart className={`h-4 w-4 ${wishlist.includes(product.id) ? 'fill-red-500 text-red-500' : 'text-emeraldDeep'}`} />
         </button>
       </div>
-      <div className="p-4">
-        <p className="text-xs font-bold uppercase tracking-wide text-emerald-700 dark:text-gold">{product.brand}</p>
-        <Link to={`/product/${product.slug}`} className="mt-1 block min-h-12 text-base font-black leading-6 hover:text-emeraldDeep dark:hover:text-gold">{product.title}</Link>
-        <div className="mt-2 flex items-center gap-2 text-sm">
+      <div className="p-3 sm:p-4">
+        <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wide text-emerald-700 dark:text-gold">{product.brand}</p>
+        <Link to={`/product/${product.slug}`} className="mt-1 block min-h-10 text-sm sm:text-base font-black leading-5 sm:leading-6 hover:text-emeraldDeep dark:hover:text-gold overflow-fix">{product.title}</Link>
+        <div className="mt-1.5 flex items-center gap-1.5 text-xs sm:text-sm">
           <Stars rating={product.rating} />
           <span className="text-gray-500 dark:text-gray-300">({product.reviews})</span>
         </div>
-        <div className="mt-3 flex items-end justify-between gap-3">
-          <div>
-            <strong className="block text-xl font-black">{money(product.price)}</strong>
-            {product.oldPrice && <span className="text-sm text-gray-400 line-through">{money(product.oldPrice)}</span>}
+        <div className="mt-2 flex items-end justify-between gap-2">
+          <div className="min-w-0">
+            <strong className="block text-base sm:text-xl font-black">{money(product.price)}</strong>
+            {product.oldPrice && <span className="text-xs text-gray-400 line-through">{money(product.oldPrice)}</span>}
           </div>
-          <span className={`rounded-full px-2 py-1 text-xs font-black ${product.stock === 'In stock' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>{product.stock}</span>
+          <span className={`rounded-full px-1.5 py-0.5 text-[10px] sm:text-xs font-black whitespace-nowrap ${product.stock === 'In stock' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>{product.stock}</span>
         </div>
-        <div className="mt-4 grid grid-cols-[1fr_auto] gap-2">
-          <button className="rounded-md bg-emeraldDeep px-4 py-2 text-sm font-black text-white" onClick={() => addToCart(product)}>Add to cart</button>
-          <Link to={`/product/${product.slug}`} className="rounded-md border border-gray-200 px-3 py-2 text-sm font-bold dark:border-white/10">Quick view</Link>
+        <div className="mt-3 grid grid-cols-[1fr_auto] gap-1.5">
+          <button className="rounded-md bg-emeraldDeep px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-black text-white" onClick={() => addToCart(product)}>Add to cart</button>
+          <Link to={`/product/${product.slug}`} className="rounded-md border border-gray-200 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-bold dark:border-white/10 whitespace-nowrap">Quick view</Link>
         </div>
       </div>
     </motion.article>
@@ -995,34 +995,34 @@ function ProductDetails() {
 
   return (
     <PageShell>
-      <div className="grid gap-8 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2">
         <ProductImageGallery images={gallery} alt={product.title} />
-        <div>
-          <p className="text-sm font-black uppercase tracking-wide text-emerald-700 dark:text-gold">{product.brand} / {product.category}</p>
-          <h1 className="mt-2 text-3xl font-black sm:text-5xl">{product.title}</h1>
+        <div className="min-w-0 overflow-fix">
+          <p className="text-xs sm:text-sm font-black uppercase tracking-wide text-emerald-700 dark:text-gold overflow-fix">{product.brand} / {product.category}</p>
+          <h1 className="mt-2 text-2xl sm:text-3xl font-black sm:text-5xl overflow-fix">{product.title}</h1>
           {product.imageName && (
-            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">({product.imageName.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')})</p>
+            <p className="mt-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400 overflow-fix">({product.imageName.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')})</p>
           )}
-          <div className="mt-4 flex flex-wrap items-center gap-3"><Stars rating={product.rating} /><span>{product.rating.toFixed(1)} rating</span><span className="text-gray-400">|</span><span>{product.reviews} reviews</span><span className="rounded-full bg-green-100 px-3 py-1 text-sm font-black text-green-700">{product.stock}</span></div>
-          <div className="mt-6 rounded-lg bg-white p-5 shadow-sm dark:bg-gray-900">
-            <div className="flex items-end gap-3"><strong className="text-4xl font-black">{money(product.price)}</strong>{product.oldPrice && <span className="text-lg text-gray-400 line-through">{money(product.oldPrice)}</span>}</div>
-            <p className="mt-3 text-gray-600 dark:text-gray-300">{product.description}</p>
-            <div className="mt-5 grid gap-2 sm:grid-cols-2">{product.specs.map((spec) => <span key={spec} className="flex items-center gap-2 text-sm"><BadgeCheck className="h-4 w-4 text-emerald-600" /> {spec}</span>)}</div>
-<div className="mt-6 flex flex-wrap items-center gap-3">
+          <div className="mt-3 sm:mt-4 flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm overflow-fix"><Stars rating={product.rating} /><span>{product.rating.toFixed(1)} rating</span><span className="text-gray-400">|</span><span>{product.reviews} reviews</span><span className="rounded-full bg-green-100 px-2 sm:px-3 py-0.5 sm:text-sm font-black text-green-700">{product.stock}</span></div>
+          <div className="mt-4 sm:mt-6 rounded-lg bg-white p-4 sm:p-5 shadow-sm dark:bg-gray-900">
+            <div className="flex flex-wrap items-end gap-2 sm:gap-3"><strong className="text-2xl sm:text-4xl font-black">{money(product.price)}</strong>{product.oldPrice && <span className="text-sm sm:text-lg text-gray-400 line-through">{money(product.oldPrice)}</span>}</div>
+            <p className="mt-2 sm:mt-3 text-xs sm:text-gray-600 dark:text-gray-300">{product.description}</p>
+            <div className="mt-4 sm:mt-5 grid gap-2 grid-cols-1 sm:grid-cols-2">{product.specs.map((spec) => <span key={spec} className="flex items-center gap-2 text-xs sm:text-sm"><BadgeCheck className="h-3 w-3 sm:h-4 sm:w-4 text-emerald-600" /> {spec}</span>)}</div>
+<div className="mt-4 sm:mt-6 flex flex-wrap items-center gap-2 sm:gap-3">
               <Quantity qty={qty} setQty={setQty} />
-              <button className="rounded-md bg-emeraldDeep px-6 py-3 font-black text-white shadow-glow" onClick={() => addToCart(product, qty)}>Add to cart</button>
-              <button className="rounded-md border border-gray-200 px-4 py-3 font-bold dark:border-white/10" onClick={() => toggleWishlist(product.id)}>{wishlist.includes(product.id) ? 'Saved' : 'Save to wishlist'}</button>
+              <button className="rounded-md bg-emeraldDeep px-4 sm:px-6 py-2 sm:py-3 font-black text-white shadow-glow text-xs sm:text-base" onClick={() => addToCart(product, qty)}>Add to cart</button>
+              <button className="rounded-md border border-gray-200 px-3 sm:px-4 py-2 sm:py-3 font-bold dark:border-white/10 text-xs sm:text-base" onClick={() => toggleWishlist(product.id)}>{wishlist.includes(product.id) ? 'Saved' : 'Save to wishlist'}</button>
             </div>
           </div>
         </div>
       </div>
-      <div className="mt-12 grid gap-8 lg:grid-cols-[1fr_360px]">
-        <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-900">
-          <h2 className="text-2xl font-black">Customer reviews</h2>
-          <div className="mt-5 grid gap-4">{reviews.map((review) => <ReviewCard review={review} key={review.name} />)}</div>
+      <div className="mt-8 sm:mt-12 grid gap-6 sm:gap-8 grid-cols-1 lg:grid-cols-[1fr_360px]">
+        <div className="rounded-lg bg-white p-4 sm:p-6 shadow-sm dark:bg-gray-900 overflow-fix">
+          <h2 className="text-xl sm:text-2xl font-black overflow-fix">Customer reviews</h2>
+          <div className="mt-4 sm:mt-5 grid gap-3 sm:gap-4">{reviews.map((review) => <ReviewCard review={review} key={review.name} />)}</div>
         </div>
-        <div className="rounded-lg bg-emeraldDeep p-6 text-white shadow-glow">
-          <h3 className="text-xl font-black">Frequently bought together</h3>
+        <div className="rounded-lg bg-emeraldDeep p-4 sm:p-6 text-white shadow-glow">
+          <h3 className="text-lg sm:text-xl font-black overflow-fix">Frequently bought together</h3>
           <div className="mt-4 space-y-3">{related.slice(0, 3).map((item) => <div key={item.id} className="flex gap-3 rounded-md bg-white/10 p-2"><LazyImage src={item.image} alt="" className="h-14 w-14 rounded object-cover" /><span className="text-sm font-bold">{item.title}<br /><span className="text-gold">{money(item.price)}</span></span></div>)}</div>
         </div>
       </div>
@@ -1039,9 +1039,9 @@ function CartDrawer() {
       {cartOpen && (
         <>
           <motion.div className="fixed inset-0 z-50 bg-black/45" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setCartOpen(false)} />
-          <motion.aside className="fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col bg-white p-5 shadow-2xl dark:bg-gray-950" initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}>
-            <div className="flex items-center justify-between"><h2 className="text-2xl font-black">Your cart</h2><button onClick={() => setCartOpen(false)}><X /></button></div>
-            <div className="mt-5 flex-1 space-y-3 overflow-auto">{cartItems.length ? cartItems.map((item) => <CartLine item={item} key={item.id} updateQty={updateQty} removeFromCart={removeFromCart} />) : <p className="rounded-lg bg-stone-50 p-6 text-center dark:bg-gray-900">Your cart is empty.</p>}</div>
+          <motion.aside className="fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col bg-white p-4 sm:p-5 shadow-2xl dark:bg-gray-950" initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}>
+            <div className="flex items-center justify-between"><h2 className="text-xl sm:text-2xl font-black">Your cart</h2><button onClick={() => setCartOpen(false)} className="rounded-full p-2 hover:bg-gray-100 dark:hover:bg-white/10"><X className="h-5 w-5" /></button></div>
+            <div className="mt-4 sm:mt-5 flex-1 space-y-2 sm:space-y-3 overflow-auto">{cartItems.length ? cartItems.map((item) => <CartLine item={item} key={item.id} updateQty={updateQty} removeFromCart={removeFromCart} />) : <p className="rounded-lg bg-stone-50 p-4 sm:p-6 text-center text-sm dark:bg-gray-900">Your cart is empty.</p>}</div>
             <OrderSummary subtotal={subtotal} discount={discount} delivery={delivery} total={total} />
             <CheckoutButton />
           </motion.aside>
@@ -1055,10 +1055,10 @@ function CartPage() {
   const { cartItems, subtotal, discount, delivery, total, updateQty, removeFromCart } = useStore();
   return (
     <PageShell>
-      <h1 className="text-4xl font-black">Cart</h1>
-      <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_360px]">
-        <div className="space-y-3">{cartItems.map((item) => <CartLine item={item} key={item.id} updateQty={updateQty} removeFromCart={removeFromCart} />)}</div>
-        <div><OrderSummary subtotal={subtotal} discount={discount} delivery={delivery} total={total} /><CheckoutButton /></div>
+      <h1 className="text-3xl sm:text-4xl font-black overflow-fix">Cart</h1>
+      <div className="mt-4 sm:mt-6 grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-[1fr_340px]">
+        <div className="space-y-2 sm:space-y-3">{cartItems.map((item) => <CartLine item={item} key={item.id} updateQty={updateQty} removeFromCart={removeFromCart} />)}</div>
+        <div className="space-y-4"><OrderSummary subtotal={subtotal} discount={discount} delivery={delivery} total={total} /><CheckoutButton /></div>
       </div>
     </PageShell>
   );
@@ -1209,10 +1209,10 @@ function AccountPage() {
 function PromoSections() {
   const flashSales = products.filter(p => p.discount >= 15).slice(0, 4);
   return (
-    <section id="flash-sales" className="bg-emeraldDeep py-14 text-white">
-      <div className="mx-auto max-w-7xl px-4">
+    <section id="flash-sales" className="bg-emeraldDeep py-10 sm:py-14 text-white">
+      <div className="mx-auto max-w-7xl px-3 sm:px-4">
         <SectionHeading eyebrow="Flash Sales" title="Limited time offers" action="Up to 28% off" />
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-4 sm:mt-6 grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4">
           {flashSales.map((product) => <ProductCard product={product} key={product.id} />)}
         </div>
       </div>
@@ -1276,12 +1276,23 @@ function DeliveryFAQ() {
 
 function Footer() {
   return (
-    <footer className="bg-gray-950 py-12 text-white">
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 md:grid-cols-4">
-        <div><h3 className="text-2xl font-black text-gold">Dan Mega Kitchen Wares</h3><p className="mt-3 text-sm leading-7 text-white/70">Premium kitchenware, home essentials, restaurant supplies, and wholesale packages from Narok, Kenya.</p></div>
+    <footer className="bg-gray-950 py-10 text-white overflow-fix">
+      <div className="mx-auto grid max-w-7xl gap-6 px-4 footer-grid">
+        <div className="min-w-0">
+          <h3 className="text-xl sm:text-2xl font-black text-gold">Dan Mega Kitchen Wares</h3>
+          <p className="mt-3 text-xs sm:text-sm leading-6 sm:leading-7 text-white/70">Premium kitchenware, home essentials, restaurant supplies, and wholesale packages from Narok, Kenya.</p>
+        </div>
         <FooterList title="Quick links" items={['Shop', 'Best sellers', 'New arrivals', 'Offers', 'Wholesale']} />
         <FooterList title="Categories" items={categories.slice(0, 6).map((c) => c.name)} />
-        <div><h4 className="font-black">Store information</h4><p className="mt-3 text-sm leading-7 text-white/70">Narok, Kenya<br />WhatsApp: +254 700 000 000<br />Email: orders@danmegakitchenwares.co.ke<br />Open Mon-Sat, 8am-6pm</p><div className="mt-4 flex gap-3"><a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-gold transition" aria-label="Facebook"><Facebook className="h-5 w-5" /></a><a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-gold transition" aria-label="Instagram"><Instagram className="h-5 w-5" /></a><a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noopener noreferrer" className="hover:text-gold transition" aria-label="WhatsApp"><ShoppingBag className="h-5 w-5" /></a></div></div>
+        <div className="min-w-0">
+          <h4 className="font-black text-sm sm:text-base">Store information</h4>
+          <p className="mt-3 text-xs sm:text-sm leading-6 sm:leading-7 text-white/70">Narok, Kenya<br />WhatsApp: +254 700 000 000<br />Email: orders@danmegakitchenwares.co.ke<br />Open Mon-Sat, 8am-6pm</p>
+          <div className="mt-3 flex gap-3">
+            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-gold transition" aria-label="Facebook"><Facebook className="h-4 w-4 sm:h-5 sm:w-5" /></a>
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-gold transition" aria-label="Instagram"><Instagram className="h-4 w-4 sm:h-5 sm:w-5" /></a>
+            <a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noopener noreferrer" className="hover:text-gold transition" aria-label="WhatsApp"><ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5" /></a>
+          </div>
+        </div>
       </div>
     </footer>
   );
@@ -1292,7 +1303,7 @@ function FooterList({ title, items }) {
 }
 
 function FloatingWhatsApp() {
-  return <a href={`https://wa.me/${whatsappNumber}`} className="fixed bottom-5 right-5 z-30 grid h-14 w-14 place-items-center rounded-full bg-green-500 text-white shadow-glow" aria-label="WhatsApp"><ShoppingBag /></a>;
+  return <a href={`https://wa.me/${whatsappNumber}`} className="fixed bottom-4 right-4 z-30 grid h-12 w-12 place-items-center rounded-full bg-green-500 text-white shadow-glow overflow-fix" aria-label="WhatsApp"><ShoppingBag /></a>;
 }
 
 function SectionHeading({ eyebrow, title, action }) {
@@ -1309,7 +1320,7 @@ function Stars({ rating }) {
 }
 
 function PageShell({ children }) {
-  return <motion.main className="mx-auto max-w-7xl px-4 py-10" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>{children}</motion.main>;
+  return <motion.main className="mx-auto max-w-7xl px-3 py-6 sm:px-4 sm:py-10 overflow-fix" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>{children}</motion.main>;
 }
 
 createRoot(document.getElementById('root')).render(<App />);
