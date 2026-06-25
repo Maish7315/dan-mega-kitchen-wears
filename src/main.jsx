@@ -34,7 +34,7 @@ import {
 } from 'lucide-react';
 import './styles.css';
 
-const whatsappNumber = '254700000000';
+const whatsappNumber = '254740297140';
 
 // Category mapping with folder names
 const categoryFolders = {
@@ -1286,7 +1286,7 @@ function Footer() {
         <FooterList title="Categories" items={categories.slice(0, 6).map((c) => c.name)} />
         <div className="min-w-0">
           <h4 className="font-black text-sm sm:text-base">Store information</h4>
-          <p className="mt-3 text-xs sm:text-sm leading-6 sm:leading-7 text-white/70">Narok, Kenya<br />WhatsApp: +254 700 000 000<br />Email: orders@danmegakitchenwares.co.ke<br />Open Mon-Sat, 8am-6pm</p>
+          <p className="mt-3 text-xs sm:text-sm leading-6 sm:leading-7 text-white/70">Narok, Kenya<br />WhatsApp: +254-740-297-140<br />Email: orders@danmegakitchenwares.co.ke<br />Open Mon-Sat, 8am-6pm</p>
           <div className="mt-3 flex gap-3">
             <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-gold transition" aria-label="Facebook"><Facebook className="h-4 w-4 sm:h-5 sm:w-5" /></a>
             <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-gold transition" aria-label="Instagram"><Instagram className="h-4 w-4 sm:h-5 sm:w-5" /></a>
